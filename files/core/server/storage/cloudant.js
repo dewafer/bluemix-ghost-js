@@ -23,10 +23,10 @@ if (process.env.VCAP_APPLICATION) {
 
 if (process.env.VCAP_SERVICES) {
     var services = JSON.parse(process.env.VCAP_SERVICES);
-    // look for a service starting with 'User Provided'
+    // look for a service starting with 'cloudantNoSQLDB'
     //
     for (var svcName in services) {
-        if (svcName.match(/^user-provided/)) {
+        if (svcName.match(/^cloudantNoSQLDB/)) {
             cloudantCreds = services[svcName][0]['credentials'];
         }
     }
@@ -35,7 +35,7 @@ if (process.env.VCAP_SERVICES) {
 }
 
 
-var nano = require('nano')('https://' + cloudantCreds.username + ':' + cloudantCreds.password + '@' + cloudantCreds.url);
+var nano = require('nano')(cloudantCreds.url);
 
 nano.db.get(dbname, function(err, body) {
     if (err) {
@@ -141,7 +141,7 @@ cloudantFileStore = _.extend(baseStore, {
 
             var base = path.basename(targetFilename, extension);
             //console.log('https://' + cloudantCreds.url + '/' + dbname + '/' + base + fullUrl);
-            var cloudantImageUrl = 'https://' + cloudantCreds.url + '/' + dbname + '/' + base + fullUrl;
+            var cloudantImageUrl = cloudantCreds.url + '/' + dbname + '/' + base + fullUrl;
             var data = fs.readFileSync('/home/vcap/app' + fullUrl);
 
             //Let's try to find a document with the same label as the image and then drill down to find the image attachment
